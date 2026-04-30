@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# FirstFullStack (React + FastAPI)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+このプロジェクトは、フロントエンドをReact (Vite + TypeScript)、バックエンドをPython FastAPIで進める構成です。
 
-Currently, two official plugins are available:
+## 1. ディレクトリ構成
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `src/`: Reactフロントエンド
+- `backend/app/main.py`: FastAPIエントリポイント
+- `backend/requirements.txt`: Python依存関係
 
-## React Compiler
+## 2. 初回セットアップ
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### フロントエンド (Node.js)
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### バックエンド (Python)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+任意の仮想環境を作成してから、以下を実行してください。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pip install -r backend/requirements.txt
 ```
+
+## 3. 開発サーバー起動
+
+### フロントのみ起動
+
+```bash
+npm run dev:frontend
+```
+
+### バックのみ起動
+
+```bash
+npm run dev:backend
+```
+
+### 両方まとめて起動
+
+```bash
+npm run dev:all
+```
+
+## 4. 接続確認
+
+- フロント: `http://localhost:5173`
+- API: `http://127.0.0.1:8000/api/health`
+
+`Home`画面では、Reactから`/api/health`を叩いてレスポンスを表示します。
+Viteのプロキシ設定により、フロント側は`/api/...`で呼び出せます。
+
+## 5. 学習の進め方 (おすすめ)
+
+1. FastAPIで`GET /api/health`のような読み取りAPIを増やす
+2. Pydanticモデルを使って`POST`のバリデーションを学ぶ
+3. React側で`axios` + `useState` + `useEffect`によるデータ取得を定着させる
+4. 認証 (JWT) を導入する
+5. DB (SQLite/PostgreSQL) とORM (SQLAlchemy) を接続する
+
+次の段階として、必要であれば「ユーザー一覧API」をFastAPIで実装して、既存の`useAllUsers`フックにつなぐ流れで進められます。

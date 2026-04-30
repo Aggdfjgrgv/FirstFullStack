@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:frontend": "vite",
+    "dev:backend": "uvicorn app.main:app --reload --app-dir backend",
+    "dev:all": "concurrently -k \"npm:dev:frontend\" \"npm:dev:backend\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -26,11 +29,13 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1",
     "vite": "^8.0.9"
   }
 }
