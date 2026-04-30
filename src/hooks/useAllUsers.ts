@@ -10,10 +10,11 @@ export const useAllUsers = () => {
 
     const getUsers = useCallback(() => {
         setLoading(true)
-        axios.get<User[]>("https://jsonplaceholder.typicode.com/users")
+        axios.get<User[]>("/api/users")
             .then(response => setUsers(response.data))
-            .catch(error => showMessage({ title: "ユーザーの取得に失敗しました", status: "error" }))
+            .catch(() => showMessage({ title: "ユーザーの取得に失敗しました", status: "error" }))
             .finally(() => setLoading(false))
-    }, [])
+    }, [showMessage])
+
     return { getUsers, loading, users }
 }
