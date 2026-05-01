@@ -1,13 +1,15 @@
 import { memo, useCallback, useState } from "react"
-import { Box, Flex, Heading, Link, IconButton, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerBody, Button } from "@chakra-ui/react"
+import { Box, Flex, Heading, Link, IconButton, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerBody, Button, Spinner, Text } from "@chakra-ui/react"
 import { MdMenu } from "react-icons/md"
 import { MenuIconButton } from "../../atoms/button/MenuIconButton"
 import { MenuDrawer } from "../../molecule/MenuDrawer"
 import { useHistory } from "react-router-dom"
+import { useWeather } from "../../../hooks/useWeather"
 
 export const Header: React.FC = memo(() => {
     const [isOpen, setIsOpen] = useState(false)
     const history = useHistory()
+    const { weather, isLoading, isError } = useWeather()
 
     const onClickHome = useCallback(() => {
         history.push("/home")
@@ -66,6 +68,24 @@ export const Header: React.FC = memo(() => {
                     >
                         設定
                     </Link>
+                </Flex>
+
+                {/* 天気情報（デスクトップ用） */}
+                <Flex
+                    align="center"
+                    gap="2"
+                    display={{ base: "none", md: "flex" }}
+                    mr={4}
+                    color="#90CDF4"
+                    fontSize="sm"
+                >
+                    {isLoading && <Spinner size="xs" color="#4299E1" />}
+                    {isError && <Text color="#FC8181">天気取得失敗</Text>}
+                    {weather && !isLoading && (
+                        <Text>
+                            東京 {weather.description} {weather.temperature}°C
+                        </Text>
+                    )}
                 </Flex>
 
                 {/* ハンバーガーメニュー（モバイル用） */}
