@@ -10,7 +10,6 @@ import { LoginUserProvider } from "../Providers/LoginUserProvider"
 export const Router: React.FC = memo(() => {
     return (
         <LoginUserProvider>
-
             <Switch>
                 <Route exact path="/">
                     <Login />

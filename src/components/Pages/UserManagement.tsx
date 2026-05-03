@@ -1,4 +1,5 @@
-import { VStack, Wrap, WrapItem, Spinner, Center, DialogRoot, DialogContent, DialogBackdrop, DialogPositioner, DialogHeader, DialogTitle, DialogCloseTrigger, Button, DialogBody, Field, Input } from "@chakra-ui/react";
+// import { VStack, Wrap, WrapItem, Spinner, Center, DialogRoot, DialogContent, DialogBackdrop, DialogPositioner, DialogHeader, DialogTitle, DialogCloseTrigger, Button, DialogBody, Field, Input, Box, Text } from "@chakra-ui/react";
+import { VStack, Wrap, WrapItem, Spinner, Center, Box, Text } from "@chakra-ui/react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { UserCard } from "../organisms/User/UserCard";
 import { useAllUsers } from "../../hooks/useAllUsers";
@@ -14,7 +15,7 @@ export const UserManagement: React.FC = memo(() => {
 
     useEffect(() => {
         getUsers();
-    }, []);
+    }, [getUsers]);
 
     const onClickUser = useCallback((id: number) => {
         onSelectUser({ id, users, onOpen: () => setOpen(true) });
@@ -22,16 +23,30 @@ export const UserManagement: React.FC = memo(() => {
     }, [onSelectUser, users]);
 
     return (
-        <>
+        <Box
+            minH="100vh"
+            bgGradient="to-b"
+            gradientFrom="cyan.100"
+            gradientTo="blue.100"
+            p={8}
+        >
             {/* ローディング中はスピナーを画面中央に表示 */}
             {loading ? (
                 <Center h="100vh">
-                    <Spinner size="xl" color="blue.300" />
+                    <Spinner size="xl" color="cyan.600" />
                 </Center>
             ) : (
-                <>
+
+                <VStack align="start" gap={6} w="full">
+                    <Box w="full" pb={4} borderBottom="3px solid" borderColor="cyan.400">
+                        <Text fontSize="3xl" fontWeight="black" color="cyan.900">
+                            👥 ユーザー管理
+                        </Text>
+                        <Text fontSize="sm" color="cyan.700" fontWeight="semibold" mt={2}>登録ユーザー一覧</Text>
+                    </Box>
+
                     {/* ユーザーカード一覧 */}
-                    <Wrap p={{ base: "4", md: "10" }} gap="6">
+                    <Wrap gap="6" w="full">
                         {users.map((user) => (
                             <WrapItem key={user.id}>
                                 <UserCard
@@ -51,9 +66,9 @@ export const UserManagement: React.FC = memo(() => {
                         selectedUser={selectedUser}
                         isAdmin={loginUser?.isAdmin}
                     />
-                </>
+                </VStack>
             )
             }
-        </>
+        </Box>
     )
 })

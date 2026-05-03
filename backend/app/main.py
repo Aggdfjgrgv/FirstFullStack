@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .models.user import EchoRequest
 from .routers import users, weather
+from .routers import marineInfo
 
 app = FastAPI(title="FirstFullStack API")
 
@@ -16,6 +17,7 @@ app.add_middleware(
 
 app.include_router(users.router)
 app.include_router(weather.router)
+app.include_router(marineInfo.router)
 
 
 @app.get("/api/health")
