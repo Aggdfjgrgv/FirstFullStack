@@ -18,7 +18,7 @@ class Spot(Base):
     __tablename__ = "spots"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    key: Mapped[str] = mapped_column(String(80), unique=True, nullable=False, index=True)
+    key: Mapped[str] = mapped_column("spot_key", String(80), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lon: Mapped[float] = mapped_column(Float, nullable=False)
