@@ -25,11 +25,11 @@ CREATE INDEX IF NOT EXISTS idx_spots_prefecture_id ON spots(prefecture_id);
 CREATE INDEX IF NOT EXISTS idx_spots_name ON spots(name);
 CREATE INDEX IF NOT EXISTS idx_spots_active ON spots(is_active);
 
-INSERT OR IGNORE INTO prefectures (code, name) VALUES
-  ('okinawa', '沖縄県'),
-  ('shizuoka', '静岡県'),
-  ('tokyo', '東京都'),
-  ('kagoshima', '鹿児島県');
+INSERT OR IGNORE INTO prefectures (id, code, name) VALUES
+  (47, 'okinawa', '沖縄県'),
+  (22, 'shizuoka', '静岡県'),
+  (13, 'tokyo', '東京都'),
+  (46, 'kagoshima', '鹿児島県');
 
 INSERT OR IGNORE INTO spots (spot_key, name, prefecture_id, lat, lon, is_active)
 SELECT 'okinawa_kerama', '慶良間諸島（沖縄）', p.id, 26.1667, 127.2833, 1

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from .db import Base, SessionLocal, engine
 from .models.marine_entities import Prefecture, Spot
@@ -6,10 +6,10 @@ from .models.user_entities import UserEntity
 
 
 PREFECTURES = [
-    {"code": "okinawa", "name": "沖縄県"},
-    {"code": "shizuoka", "name": "静岡県"},
-    {"code": "tokyo", "name": "東京都"},
-    {"code": "kagoshima", "name": "鹿児島県"},
+    {"id": 47, "code": "okinawa", "name": "沖縄県"},
+    {"id": 22, "code": "shizuoka", "name": "静岡県"},
+    {"id": 13, "code": "tokyo", "name": "東京都"},
+    {"id": 46, "code": "kagoshima", "name": "鹿児島県"},
 ]
 
 SPOTS = [
@@ -78,15 +78,32 @@ USERS = [
 
 def _seed_master_data() -> None:
     with SessionLocal() as session:
+        for prefecture in PREFECTURES:
+            target_id = prefecture["id"]
+            code = prefecture["code"]
+            name = prefecture["name"]
+
+            by_code = session.scalar(select(Prefecture).where(Prefecture.code == code).limit(1))
+            if by_code is None:
+                session.add(Prefecture(id=target_id, code=code, name=name))
+                continue
+
+            by_code.name = name
+            if by_code.id != target_id:
+                conflict = session.scalar(select(Prefecture).where(Prefecture.id == target_id).limit(1))
+                if conflict is not None and conflict.code != code:
+                    raise RuntimeError(f"Prefecture id conflict: {target_id} is used by {conflict.code}")
+
+                session.execute(
+                    update(Spot)
+                    .where(Spot.prefecture_id == by_code.id)
+                    .values(prefecture_id=target_id)
+                )
+                by_code.id = target_id
+
         has_spot = session.scalar(select(Spot.id).limit(1))
         if has_spot is None:
-            prefecture_by_code: dict[str, Prefecture] = {}
-            for prefecture in PREFECTURES:
-                row = Prefecture(code=prefecture["code"], name=prefecture["name"])
-                session.add(row)
-                prefecture_by_code[prefecture["code"]] = row
-
-            session.flush()
+            prefecture_id_by_code = {prefecture["code"]: prefecture["id"] for prefecture in PREFECTURES}
 
             for spot in SPOTS:
                 session.add(
@@ -95,7 +112,7 @@ def _seed_master_data() -> None:
                         name=spot["name"],
                         lat=spot["lat"],
                         lon=spot["lon"],
-                        prefecture_id=prefecture_by_code[spot["prefecture"]].id,
+                        prefecture_id=prefecture_id_by_code[spot["prefecture"]],
                     )
                 )
 
