@@ -1,33 +1,72 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 import httpx
-from ..models.marineInfo import MarineResponse, DivingSpot
+from sqlalchemy import or_, select
+from sqlalchemy.orm import Session
+
+from ..db import get_db
+from ..models.marineInfo import DivingSpot, MarineResponse, PrefectureInfo
+from ..models.marine_entities import Prefecture, Spot
 
 router = APIRouter(prefix="/api/marine", tags=["marine"])
 
-DIVING_SPOTS: dict[str, DivingSpot] = {
-    "okinawa_kerama": DivingSpot(name="慶良間諸島（沖縄）", lat=26.1667, lon=127.2833),
-    "okinawa_iriomote": DivingSpot(name="西表島（沖縄）", lat=24.3167, lon=123.8667),
-    "okinawa_ishigaki": DivingSpot(name="石垣島（沖縄）", lat=24.3333, lon=124.1333),
-    "izu_osezaki": DivingSpot(name="大瀬崎（伊豆）", lat=35.0333, lon=138.7833),
-    "izu_futo": DivingSpot(name="富戸（伊豆）", lat=34.9167, lon=139.1333),
-    "izu_yawatano": DivingSpot(name="八幡野（伊豆）", lat=34.8833, lon=139.1167),
-    "ogasawara": DivingSpot(name="小笠原諸島", lat=27.0833, lon=142.1833),
-    "yakushima": DivingSpot(name="屋久島（鹿児島）", lat=30.3667, lon=130.6500),
-    "amami": DivingSpot(name="奄美大島（鹿児島）", lat=28.3667, lon=129.5000),
-}
+
+def _to_diving_spot_dict(spots: list[Spot]) -> dict[str, DivingSpot]:
+    return {
+        spot.key: DivingSpot(name=spot.name, lat=spot.lat, lon=spot.lon)
+        for spot in spots
+    }
+
+
+@router.get("/prefectures", response_model=list[PrefectureInfo])
+def get_prefectures(db: Session = Depends(get_db)) -> list[PrefectureInfo]:
+    rows = db.scalars(select(Prefecture).order_by(Prefecture.id.asc())).all()
+
+    return [PrefectureInfo(code=row.code, name=row.name) for row in rows]
 
 
 @router.get("/spots")
-def get_spots() -> dict[str, DivingSpot]:
-    return DIVING_SPOTS
+def get_spots(
+    prefecture: str | None = None,
+    q: str | None = None,
+    db: Session = Depends(get_db),
+) -> dict[str, DivingSpot]:
+    stmt = (
+        select(Spot)
+        .join(Prefecture, Spot.prefecture_id == Prefecture.id)
+        .where(Spot.is_active.is_(True))
+        .order_by(Spot.id.asc())
+    )
+
+    if prefecture:
+        stmt = stmt.where(
+            or_(
+                Prefecture.code == prefecture,
+                Prefecture.name == prefecture,
+            )
+        )
+
+    if q:
+        stmt = stmt.where(Spot.name.contains(q))
+
+    spots = db.scalars(stmt).all()
+
+    return _to_diving_spot_dict(spots)
 
 
 @router.get("/info", response_model=MarineResponse)
-def get_marine_info(spot: str = "okinawa_kerama") -> MarineResponse:
-    if spot not in DIVING_SPOTS:
-        raise HTTPException(status_code=404, detail=f"Spot '{spot}' not found. Use GET /api/marine/spots to see available spots.")
+def get_marine_info(
+    spot: str = "okinawa_kerama",
+    db: Session = Depends(get_db),
+) -> MarineResponse:
+    diving_spot = db.scalar(
+        select(Spot)
+        .where(Spot.key == spot)
+        .where(Spot.is_active.is_(True))
+        .limit(1)
+    )
 
-    diving_spot = DIVING_SPOTS[spot]
+    if diving_spot is None:
+        raise HTTPException(status_code=404, detail=f"Spot '{spot}' not found. Use GET /api/marine/spots to see available spots.")
 
     try:
         response = httpx.get(

@@ -7,6 +7,11 @@ class DivingSpot(BaseModel):
     lon: float
 
 
+class PrefectureInfo(BaseModel):
+    code: str
+    name: str
+
+
 class CurrentUnits(BaseModel):
     time: str
     interval: str

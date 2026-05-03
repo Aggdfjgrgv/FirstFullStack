@@ -1,19 +1,38 @@
-from fastapi import APIRouter, HTTPException
-import httpx
-from ..models.user import EchoRequest, UserResponse
+from fastapi import APIRouter, Depends
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from ..db import get_db
+from ..models.user import Address, Company, Geo, UserResponse
+from ..models.user_entities import UserEntity
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
 @router.get("", response_model=list[UserResponse])
-def get_users() -> list[UserResponse]:
-    try:
-        response = httpx.get(
-            "https://jsonplaceholder.typicode.com/users/",
-            timeout=10.0,
-        )
-        response.raise_for_status()
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail="Failed to fetch users from JsonPlaceholder") from exc
+def get_users(db: Session = Depends(get_db)) -> list[UserResponse]:
+    rows = db.scalars(select(UserEntity).order_by(UserEntity.id.asc())).all()
 
-    return response.json()
+    return [
+        UserResponse(
+            id=row.id,
+            name=row.name,
+            username=row.username,
+            email=row.email,
+            address=Address(
+                street=row.street,
+                suite=row.suite,
+                city=row.city,
+                zipcode=row.zipcode,
+                geo=Geo(lat=row.geo_lat, lng=row.geo_lng),
+            ),
+            phone=row.phone,
+            website=row.website,
+            company=Company(
+                name=row.company_name,
+                catchPhrase=row.company_catch_phrase,
+                bs=row.company_bs,
+            ),
+        )
+        for row in rows
+    ]
