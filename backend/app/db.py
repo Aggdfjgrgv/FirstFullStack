@@ -16,6 +16,7 @@ class Base(DeclarativeBase):
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False},
+    # echo=True,  # SQLクエリをログに出力（開発中のみ有効にすることを推奨）
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

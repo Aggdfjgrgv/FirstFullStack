@@ -21,7 +21,11 @@ export const useMarine = ({ prefecture }: UseMarineProps = {}) => {
     const [isSpotsLoading, setIsSpotsLoading] = useState(true)
 
     useEffect(() => {
+        let isCancelled = false
+
         const fetchSpots = async () => {
+            setSpotMarineList([])
+            setIsSpotsLoading(true)
             try {
                 const url = new URL("/api/marine/spots", window.location.origin)
                 if (prefecture) {
@@ -30,19 +34,33 @@ export const useMarine = ({ prefecture }: UseMarineProps = {}) => {
                 const res = await fetch(url.toString())
                 if (!res.ok) throw new Error("Failed to fetch spots")
                 const data: SpotsMap = await res.json()
-                setSpots(data)
+                if (!isCancelled) {
+                    setSpots(data)
+                }
             } catch {
-                setIsSpotsLoading(false)
+                if (!isCancelled) {
+                    setSpots({})
+                }
             } finally {
-                setIsSpotsLoading(false)
+                if (!isCancelled) {
+                    setIsSpotsLoading(false)
+                }
             }
         }
 
         void fetchSpots()
+
+        return () => {
+            isCancelled = true
+        }
     }, [prefecture])
 
     useEffect(() => {
-        if (Object.keys(spots).length === 0) return
+        let isCancelled = false
+
+        if (Object.keys(spots).length === 0) {
+            return
+        }
 
         const fetchAll = async () => {
             const initial: SpotMarine[] = Object.entries(spots).map(([key, spot]) => ({
@@ -54,22 +72,40 @@ export const useMarine = ({ prefecture }: UseMarineProps = {}) => {
             }))
             setSpotMarineList(initial)
 
-            const results = await Promise.all(
-                Object.entries(spots).map(async ([key, spot]) => {
+            Object.entries(spots).forEach(([key]) => {
+                void (async () => {
                     try {
-                        const res = await fetch(`/api/marine/info?spot=${key}`)
+                        const res = await fetch(`/api/marine/info?spot=${encodeURIComponent(key)}`)
                         if (!res.ok) throw new Error("Failed")
                         const data: MarineResponse = await res.json()
-                        return { spotKey: key, spotName: spot.name, data, isLoading: false, isError: false }
+
+                        if (isCancelled) return
+                        setSpotMarineList((prev) =>
+                            prev.map((item) =>
+                                item.spotKey === key
+                                    ? { ...item, data, isLoading: false, isError: false }
+                                    : item
+                            )
+                        )
                     } catch {
-                        return { spotKey: key, spotName: spot.name, data: null, isLoading: false, isError: true }
+                        if (isCancelled) return
+                        setSpotMarineList((prev) =>
+                            prev.map((item) =>
+                                item.spotKey === key
+                                    ? { ...item, data: null, isLoading: false, isError: true }
+                                    : item
+                            )
+                        )
                     }
-                })
-            )
-            setSpotMarineList(results)
+                })()
+            })
         }
 
         void fetchAll()
+
+        return () => {
+            isCancelled = true
+        }
     }, [spots])
 
     return { spotMarineList, isSpotsLoading }
