@@ -4,8 +4,8 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models.marineInfo import DivingSpot, MarineResponse, PrefectureInfo
 from ..models.marine_entities import Prefecture, Spot
+from ..schemas.marine import DivingSpot, MarineResponse, PrefectureInfo
 
 router = APIRouter(prefix="/api/marine", tags=["marine"])
 

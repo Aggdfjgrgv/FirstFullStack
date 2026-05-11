@@ -80,7 +80,8 @@ export const Home: React.FC = memo(() => {
                             fontSize: "16px",
                             borderRadius: "4px",
                             border: "1px solid #ccc",
-                            minWidth: "200px"
+                            minWidth: "200px",
+                            color: "#333",
                         }}
                     >
                         <option value="">全国</option>

@@ -3,8 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models.user import Address, Company, Geo, UserResponse
 from ..models.user_entities import UserEntity
+from ..schemas.user import Address, Company, Geo, UserResponse
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 import httpx
-from ..models.weather import WeatherResponse
+from ..schemas.weather import WeatherResponse
 
 router = APIRouter(prefix="/api/weather", tags=["weather"])
 

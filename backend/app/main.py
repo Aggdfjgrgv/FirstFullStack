@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .init_db import init_db
-from .models.user import EchoRequest
 from .routers import users, weather
 from .routers import marineInfo
+from .schemas.user import EchoRequest
 
 app = FastAPI(title="FirstFullStack API")
 
