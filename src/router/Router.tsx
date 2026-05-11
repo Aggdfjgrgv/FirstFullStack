@@ -14,8 +14,9 @@ export const Router: React.FC = memo(() => {
                 <Route exact path="/">
                     <Login />
                 </Route>
-                <Route path="/home" render={({ match: { url } }) => (
-                    console.log(url),
+                <Route path="/home" render={({ match: { url }, location: { pathname, search }, history: { push } }) => (
+                    console.log(pathname, search),
+                    console.log(push),
                     <Switch>
                         {homeRoutes.map((route) => (
                             <Route key={route.path} path={`${url}${route.path}`} exact={route.exact}>

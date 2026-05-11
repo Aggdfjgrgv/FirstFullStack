@@ -4,11 +4,18 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { useMarine } from "../../hooks/useMarine";
 import { SpotCard } from "../organisms/Marine/SpotCard";
 
+interface Prefecture {
+    code: string
+    name: string
+}
+
 export const Home: React.FC = memo(() => {
     const [message, setMessage] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
-    const { spotMarineList, isSpotsLoading } = useMarine();
+    const [prefectures, setPrefectures] = useState<Prefecture[]>([]);
+    const [selectedPrefecture, setSelectedPrefecture] = useState<string | null>(null);
+    const { spotMarineList, isSpotsLoading } = useMarine({ prefecture: selectedPrefecture });
 
     const fetchHealth = useCallback(async () => {
         setIsLoading(true);
@@ -24,9 +31,19 @@ export const Home: React.FC = memo(() => {
         }
     }, []);
 
+    const fetchPrefectures = useCallback(async () => {
+        try {
+            const response = await axios.get<Prefecture[]>("/api/marine/prefectures");
+            setPrefectures(response.data);
+        } catch {
+            setError("県情報の取得に失敗しました。");
+        }
+    }, []);
+
     useEffect(() => {
         void fetchHealth();
-    }, [fetchHealth]);
+        void fetchPrefectures();
+    }, [fetchHealth, fetchPrefectures]);
 
     return (
         <Box
@@ -55,6 +72,24 @@ export const Home: React.FC = memo(() => {
                         {isLoading ? "接続中..." : "接続確認"}
                     </Button>
                     {isLoading && <Spinner size="sm" color="cyan.600" />}
+                    <select
+                        value={selectedPrefecture || ""}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedPrefecture(e.target.value || null)}
+                        style={{
+                            padding: "8px 12px",
+                            fontSize: "16px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            minWidth: "200px"
+                        }}
+                    >
+                        <option value="">全国</option>
+                        {prefectures.map((pref) => (
+                            <option key={pref.code} value={pref.code}>
+                                {pref.name}
+                            </option>
+                        ))}
+                    </select>
                 </HStack>
 
                 {message && (

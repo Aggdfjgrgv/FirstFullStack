@@ -11,7 +11,11 @@ type SpotMarine = {
     isError: boolean
 }
 
-export const useMarine = () => {
+interface UseMarineProps {
+    prefecture?: string | null
+}
+
+export const useMarine = ({ prefecture }: UseMarineProps = {}) => {
     const [spots, setSpots] = useState<SpotsMap>({})
     const [spotMarineList, setSpotMarineList] = useState<SpotMarine[]>([])
     const [isSpotsLoading, setIsSpotsLoading] = useState(true)
@@ -19,7 +23,11 @@ export const useMarine = () => {
     useEffect(() => {
         const fetchSpots = async () => {
             try {
-                const res = await fetch("/api/marine/spots")
+                const url = new URL("/api/marine/spots", window.location.origin)
+                if (prefecture) {
+                    url.searchParams.append("prefecture", prefecture)
+                }
+                const res = await fetch(url.toString())
                 if (!res.ok) throw new Error("Failed to fetch spots")
                 const data: SpotsMap = await res.json()
                 setSpots(data)
@@ -31,7 +39,7 @@ export const useMarine = () => {
         }
 
         void fetchSpots()
-    }, [])
+    }, [prefecture])
 
     useEffect(() => {
         if (Object.keys(spots).length === 0) return

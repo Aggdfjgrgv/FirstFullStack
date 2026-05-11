@@ -1,15 +1,16 @@
 import { memo, useCallback, useState } from "react"
-import { Box, Flex, Heading, Link, IconButton, DrawerRoot, DrawerBackdrop, DrawerContent, DrawerBody, Button, Spinner, Text } from "@chakra-ui/react"
-import { MdMenu } from "react-icons/md"
+import { Flex, Heading, Link, Spinner, Text } from "@chakra-ui/react"
 import { MenuIconButton } from "../../atoms/button/MenuIconButton"
 import { MenuDrawer } from "../../molecule/MenuDrawer"
 import { useHistory } from "react-router-dom"
 import { useWeather } from "../../../hooks/useWeather"
+import { useLoginUser } from "../../../hooks/useLoginUser"
 
 export const Header: React.FC = memo(() => {
     const [isOpen, setIsOpen] = useState(false)
     const history = useHistory()
     const { weather, isLoading, isError } = useWeather()
+    const { loginUser } = useLoginUser()
 
     const onClickHome = useCallback(() => {
         history.push("/home")
@@ -46,7 +47,7 @@ export const Header: React.FC = memo(() => {
                     onClick={onClickHome}
                 >
                     <Heading as="h1" fontSize={{ base: "md", md: "lg" }} color="#4299E1" letterSpacing="wider">
-                        USER MANAGER
+                        Home
                     </Heading>
                 </Flex>
 
@@ -87,6 +88,18 @@ export const Header: React.FC = memo(() => {
                         </Text>
                     )}
                 </Flex>
+
+                {/* ログインユーザー名 */}
+                {loginUser && (
+                    <Text
+                        display={{ base: "none", md: "block" }}
+                        color="#90CDF4"
+                        fontSize="sm"
+                        mr={4}
+                    >
+                        {loginUser.username}
+                    </Text>
+                )}
 
                 {/* ハンバーガーメニュー（モバイル用） */}
                 <MenuIconButton onClick={() => setIsOpen(true)} />
