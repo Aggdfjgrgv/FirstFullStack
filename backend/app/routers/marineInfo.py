@@ -34,7 +34,7 @@ def get_spots(
         select(Spot)
         .join(Prefecture, Spot.prefecture_id == Prefecture.id)
         .where(Spot.is_active.is_(True))
-        .order_by(Spot.id.asc())
+        .order_by(Prefecture.id.asc(), Spot.name.asc(), Spot.id.asc())
     )
 
     if prefecture:
